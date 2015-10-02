@@ -1,0 +1,7 @@
+ - means standout and standinput
+
+ cat - "file1" <<< "hello"
+    input the "hello" to the standinput, here it's '-'
+    display - and file1 to the output
+ cat - "file1" <<< "hello" > 1.txt
+    display - and file1 to the 1.txt
