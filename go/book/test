@@ -1,0 +1,9 @@
+#/bin/bash
+if [ ! -z "abc" ]
+then
+	cat >>me <<- End
+	 echo "hello"
+	world
+End
+fi
+
