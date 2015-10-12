@@ -1,0 +1,13 @@
+ exec 6<>file1
+ echo "hello world" >&6
+  
+ exec 6>&1
+ 
+ exec 6>&- 关闭掉6
+
+ read line <&6
+
+# 没内容在屏幕上显示
+rm  $(find . -name 1) &> /dev/null
+
+ 

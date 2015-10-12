@@ -5,3 +5,14 @@
     display - and file1 to the output
  cat - "file1" <<< "hello" > 1.txt
     display - and file1 to the 1.txt
+
+---http://lgfang.github.io/computer/2015/08/05/io-redirect-shortcut/
+There are two formats for redirecting standard output and standard
+error:
+     &>WORD
+   and
+     >&WORD
+   Of the two forms, the first is preferred. This is semantically
+equivalent to
+     >WORD 2>&1
+
