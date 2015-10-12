@@ -1,0 +1,120 @@
+- 严格的轮换
+   每个进程每次都从头执行到尾，效率不高，可能等待很久
+- 屏蔽中断
+   刚刚进入临界区时就屏蔽中断，刚要出临界区就打开中断
+- 专用机器指令
+   test_and_set,test_and_clear
+- 加锁
+- 软件方法
+- 信号量机制
+  信号量 
+    - 整型信号量
+    - 记录型信号量
+    - AND信号量
+    - 信号量集
+
+===>整型信号量
+
+P(s):
+  while(s<=0)
+  {
+     do nothing
+  }
+  s=s-1
+
+V(s):
+ s=s+1
+
+---- 违反了让权等待的原则. 从而出现了
+
+===>记录型信号量
+记录型信号量的数据结构是一个两元组，包含信号量的值value和关于此信号量的阻塞队列Q，value具有非负初值，一般反映了资源的数量，只能由P,V操作改变其值。（还有另一种定义，信号量由value和P组成，value为信号量的值，P为指向PCB队列的指针）。
+P(s):
+  s.value = s.value - 1
+  if (s.value < 0 )
+      block(S, Q)
+V(s):
+  s.value = s.value + 1
+  if(s.value <= 0)
+      wakeup(S, Q)
+
+P操作相当于“等待一个信号”，而V操作相当于“发送一个信号”，在实现同步过程中，V操作相当于发送一个信号说合作者已经完成了某项任务，在实现互斥过程中，V操作相当于发送一个信号说临界资源可用了。实际上，在实现互斥时，P,V操作相当于申请资源和释放资源。
+
+我们将信号量初值设置为1时通常可实现互斥，因为信号量表示资源可用数目，互斥信号量保证只有一个进程访问临界资源，相当于只有一个访问权可用。设置为0或者N时可以用来实现同步。我们后面将会在生产者-消费者问题中看到这点。用P,V操作实现互斥类似于加锁的实现，在临界区之前加P操作，在临界区之后加V操作，即可互斥控制进程进入临界区，访问临界资源。记录型信号量由于引入了阻塞机制，消除了不让权等待的情况，提高了实现的效率。
+
+同步与互斥实现的P,V操作虽然都是成对出现，但是互斥的P,V操作出现在同一个进程的程序里，而同步的P,V操作出现在不同进程的程序中.
+
+
+   
+linux提供两种类型的信号量
+  - 内核信号量，由内核控制路径使用  (kernel-sem)
+  - 用户态进程使用的信号量，这种信号量又分为POSIX信号量和SYSTEM V信号量  (user-sem)
+
+kernel-sem:
+  - asm/semaphore.h
+    + initialize +
+     void sema_init (struct semaphore *sem, int val);
+     void init_MUTEX (struct semaphore *sem);   //将sem的值置为1，表示资源空闲
+     void init_MUTEX_LOCKED (struct semaphore *sem);  //将sem的值置为0，表示资源忙
+   + 申请内核信号量所保护的资源 +
+     void down(struct semaphore * sem);            // 可引起睡眠
+     int down_interruptible(struct semaphore * sem);   // down_interruptible能被信号打断
+     int down_trylock(struct semaphore * sem);       // 非阻塞函数，不会睡眠。无法锁定资源则马上返回
+   + 释放内核信号量保护的资源 +
+    void up(struct semaphore * sem);
+
+  struct semaphore {
+　　 atomic_t count;
+　　 int sleepers;
+　　 wait_queue_head_t wait;
+　　}
+
+user-sem:
+  POSIX 信号量  <semaphore.h>
+   - 无名信号量  像声明变量一样
+      int sem_init(sem_t *sem, int pshared, unsigned int value);
+      int sem_getvalue(sem_t *sem, int *sval);
+       - p 操作 -
+      int sem_wait(sem_t *sem);     // 这是一个阻塞的函数
+      int sem_trywait(sem_t *sem);   // 非阻塞的函数
+      - V 操作 -
+     int sem_post(sem_t *sem);
+ - 有名信号量  放到文件里
+    sem_t *sem_open(const char *name,  int oflag, mode_t mode , int value);
+    sem_close（）函数
+    sem_unlink()
+
+ SYSTEM V信号量 <sys/sem.h>
+  int semget(key_t  key, int  nsems, int  oflag)  /*创建和打开信号量*/
+  int semop(int  semid, struct  sembuf  *opsptr, size_t  nops);  /*设置信号量的值 PV */
+  int semctl ( int semid, int semnum, int cmd, union semun arg );  /*对信号集实行控制操作（semval的赋值等）*/
+  semun 是一个必须有用户指定的结构，但次结构有特殊的格式
+  semum是一个必须由用户自定义的结构体，在这里我们务必弄清楚该结构体的组成：
+/*case-1*/
+union semun
+{
+    int val;                // cmd == SETVAL
+    struct semid_ds *buf     // cmd == IPC_SET或者 cmd == IPC_STAT
+    ushort *array;          // cmd == SETALL，或 cmd = GETALL
+};
+
+/*case-2*/
+union semun {
+                int val;                /* value for SETVAL */
+                struct semid_ds *buf;   /* buffer for IPC_STAT & IPC_SET */
+                ushort *array;          /* array for GETALL & SETALL */
+                struct seminfo *__buf;  /* buffer for IPC_INFO */
+                void *__pad;
+        };
+成员_buf 和_pad用在内核中信号量 是linux特有的，在UNIX中没有
+
+semop()中的第一个参数(semid)是集合的识别号(可以由semget()系统调用得到)。第二个参数(sops)是一个指针，它指向在集合上执行操作的数组。而第三个参数(nsop)是在那个数组上操作的个数。
+sops参数指向类型为sembuf的一个数组，这个结构在/inclide/linux/sem.h 中声明，是内核中的一个数据结构，描述如下：
+              struct sembuf {
+                ushort  sem_num;        /* 在数组中信号量的索引值 */
+                short   sem_op;         /* 信号量操作值(正数、负数或0) */
+                short   sem_flg;        /* 操作标志，为IPC_NOWAIT或SEM_UNDO*/
+        };
+
+如果sem_op为负数，那么就从信号量的值中减去sem_op的绝对值，这意味着进程要获取资源，这些资源是由信号量控制或监控来存取的。如果没有指定IPC_NOWAIT，那么调用进程睡眠到请求的资源数得到满足(其它的进程可能释放一些资源)。
+如果sem_op是正数，把它的值加到信号量，这意味着把资源归还给应用程序的集合
