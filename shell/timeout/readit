@@ -1,0 +1,8 @@
+#!/bin/bash
+sleep 3
+readit_pid=$(ps -ef | grep readit | grep -v grep | awk '{print $2}')
+#if [ $readit_pid != "" ]
+if [ "$readit_pid" != "" ]
+then
+  kill $readit_pid
+fi

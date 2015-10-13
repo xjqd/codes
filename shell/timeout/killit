@@ -1,0 +1,11 @@
+#!/bin/bash
+echo Timeout in 3 seconds
+echo -e "Do you want to skip or not?(y/n)"
+read ans
+ans=$(echo $ans|tr [A-Z] [a-z])
+if [ "$ans" = 'y' ]
+then 
+ exit 1
+else
+ exit 2
+fi

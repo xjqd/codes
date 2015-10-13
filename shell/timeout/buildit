@@ -1,0 +1,5 @@
+#!/bin/bash
+./killit &
+./readit
+ans=$?
+echo The return code is $ans
