@@ -1,0 +1,10 @@
+#!/bin/python
+class A(object):
+
+    def run(self):
+        print "running in A"
+
+class B(object):
+    def run(self):
+        print "running in B"
+    
