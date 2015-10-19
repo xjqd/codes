@@ -1,0 +1,12 @@
+case-1
+from new import classobj
+myClass = classobj('className',(baseClass,),{dictAttr:dictValue,...})
+参数说明：
+classobj(类名，基类列表--必须是tuple,属性字典)
+这个时候类的名字不等于类的索引，上面创建的类需要通过myClass来使用。
+
+case-2
+自定义元类
+  1) __metaclass__ = '创建类的类'
+  2) 创建类的类必须是从type继承而来的
+  3) 创建类的类要改写__new__的方式创建类
