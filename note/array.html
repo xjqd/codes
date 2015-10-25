@@ -1,0 +1,61 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<link rel="Stylesheet" type="text/css" href="style.css">
+<title>array</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head>
+<body>
+
+<ul>
+<li>
+在 Go 语言中数组是固定长度的数据类型，它包含相同类型的连续的元素
+
+<li>
+数据类型可以是 int string bool struct
+
+<li>
+表达形式 
+        var array [5]int
+        array = [5] int {1, 2, 3, 4, 5}
+
+<ul>
+<li>
+指定位置初始化
+
+<li>
+array := [5]int { 1:77 }
+
+<li>
+指针数组
+
+<ul>
+<li>
+array := [5] *int{}
+
+</ul>
+<li>
+二维数组
+
+</ul>
+<li>
+ 中括号中必须有固定数字，利用{}直接赋值
+
+<li>
+ 数组作为参数传递
+<pre go>
+         func foo(arry *[1e6]int) {
+            ...
+            }
+
+         func main() {
+         arry := [1e6]int
+         foo(&amp;arry)
+         ...
+         }
+</pre>
+
+</ul>
+
+</body>
+</html>

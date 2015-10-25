@@ -1,0 +1,116 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<link rel="Stylesheet" type="text/css" href="style.css">
+<title>map</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head>
+<body>
+
+<ul>
+<li>
+map 是一种无序的键值对序列
+
+<li>
+表达形式
+
+<ul>
+<li>
+key includes origin type and struct type. not include slice, function,
+
+<li>
+values is the expression
+
+<li>
+map[string]int
+
+<li>
+字面赋值
+
+<ul>
+<li>
+dict := map[string]string{"color1":"red","color2":"blue"}
+
+</ul>
+<li>
+make 赋值
+
+<ul>
+<li>
+dict := make(map[string]int){"red":1,"blue":2}
+
+<li>
+dict1 := make(map[string]int){}
+             dict1["red"]=2
+             dict1["blue"]=3
+
+</ul>
+</ul>
+<li>
+如果不初始化一个map,则会创建一个nil map
+
+<ul>
+<li>
+var map[string]int
+        nil map不能存放键值对
+
+</ul>
+<li>
+从map里检索一个值
+       -case1
+<pre  go>
+           value, exists := colors["blue"]
+           if exists {
+              fmt.Println(value)
+              }
+</pre>
+       -case2
+<pre  go>
+          value := colors["blue"]
+           if value != "" {
+                fmt.Println(value)
+                }
+</pre>
+
+<ul>
+<li>
+迭代map ( 与取一个键值对不同)
+<pre go>
+         colors := map[string]string {
+              "AliceBlue":   "#f0f8ff",
+              "Coral":       "#ff7F50",
+              "DarkGray":    "#a9a9a9",
+              "ForestGreen": "#228b22",
+              }
+         for key, value :=range colors {
+            fmt.Println("key=", key, "value=",value)
+            }
+</pre>
+   *从map中删除键值对
+<pre go>
+          delete colors["Coral"]
+          colors["Coral"] = "#aaaaa"
+</pre>
+
+<li>
+在函数间传递map,传递的是指向
+<pre go>
+         func remove_ele(colors map[string]string){
+            delete colors["Coral"]
+            }
+         func main() {
+         colors := map[string]string {
+                            "AliceBlue":   "#f0f8ff",
+                            "Coral":       "#ff7F50",
+                            "DarkGray":    "#a9a9a9",
+                            "ForestGreen": "#228b22",
+                            }
+         remove_ele(colors)
+         }
+</pre>
+
+</ul>
+</ul>
+
+</body>
+</html>
