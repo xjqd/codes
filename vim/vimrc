@@ -17,12 +17,28 @@ Plugin 'VundleVim/Vundle.vim'
 Plugin 'candy.vim'
 Plugin 'vim-scripts/desert256.vim'
 Plugin 'vim-scripts/comments.vim'
+Plugin 'fholgado/minibufexpl.vim'
+Plugin 'vim-scripts/L9'
+Plugin 'vim-scripts/FuzzyFinder'
+Plugin 'vimwiki/vimwiki'
+Plugin 'fatih/vim-go'
+Plugin 'brookhong/cscope.vim'
+Plugin 'vim-scripts/taglist.vim'
+Plugin 'vim-scripts/autoload_cscope.vim'
+Plugin 'wincent/command-t'
+Plugin 'majutsushi/tagbar'
+"Plugin 'charz/multi-cscope-db'
+Plugin 'airblade/vim-rooter'
+"vim plugin debug
+Plugin 'vim-scripts/Decho'
+Plugin 'vim-scripts/debug.vim'
 call vundle#end()            " required
 filetype plugin indent on    " required
 syntax on
 
 
 set backspace=indent,eol,start
+set paste
 
 if has("vms")
   set nobackup      " do not keep a backup file, use versions instead
@@ -46,9 +62,14 @@ endif
 
 "Tab
 """"""""""""""""""""""""""
-set tabstop=4
+"Related with code indent
+set autoindent " same level indent
+set smartindent " next level indent
 set expandtab
-"set softtabstop=4
+set tabstop=4
+set shiftwidth=4
+set softtabstop=4
+
 "python tab
 """"""""""""""""""
 "shift left or right together >
@@ -62,3 +83,104 @@ else
     colorscheme desert      " Or some other low-color scheme
 endif
 "
+" go setting
+
+"minibuffer 
+let g:miniBufExplBuffersNeeded = 1
+hi MBENormal               guifg=#808080 guibg=fg
+hi MBEChanged              guifg=#CD5907 guibg=fg
+hi MBEVisibleNormal        guifg=#5DC2D6 guibg=fg
+hi MBEVisibleChanged       guifg=#F1266F guibg=fg
+hi MBEVisibleActiveNormal  guifg=#A6DB29 guibg=fg
+hi MBEVisibleActiveChanged guifg=#F1266F guibg=fg
+
+"tagbar
+nnoremap <silent> <F9> :TagbarToggle<CR>
+let g:tagbar_left=1
+let g:tagbar_autoshowtag = 1
+
+"taglist
+"nnoremap <silent> <F9> :TlistToggle<CR>
+"let Tlist_Use_SingleClick=1
+"let Tlist_File_Fold_Auto_Close=1
+"let Tlist_Show_One_File=1
+"let Tlist_Exit_OnlyWindow=1
+
+"vimwiki
+let wiki_1 = {}
+let wiki_1.path = '~/.wiki/'
+let wiki_1.path_html = '~/.wiki/html'
+let wiki_1.html_template = '~/public_html/template.tpl'
+let wiki_1.nested_syntaxes = {'python': 'python', 'c++': 'cpp', 'go': 'go'}
+
+let g:vimwiki_list = [wiki_1]
+
+"Cscove
+"let g:cscope_preload_path="/usr/lib/python2.7/site-packages/oslo_config;"
+nnoremap <leader>fa :call CscopeFindInteractive(expand('<cword>'))<CR>
+nnoremap <leader>\ :call ToggleLocationList()<CR>
+nnoremap <leader>l :CscopeList<CR>
+    " s: Find this C symbol
+nnoremap  <leader>fs :call CscopeFind('s', expand('<cword>'))<CR>
+    " g: Find this definition
+nnoremap  <leader>fg :call CscopeFind('g', expand('<cword>'))<CR>
+    " d: Find functions called by this function
+nnoremap  <leader>fd :call CscopeFind('d', expand('<cword>'))<CR>
+    " c: Find functions calling this function
+nnoremap  <leader>fc :call CscopeFind('c', expand('<cword>'))<CR>
+    " t: Find this text string
+nnoremap  <leader>ft :call CscopeFind('t', expand('<cword>'))<CR>
+    " e: Find this egrep pattern
+nnoremap  <leader>fe :call CscopeFind('e', expand('<cword>'))<CR>
+    " f: Find this file
+nnoremap  <leader>ff :call CscopeFind('f', expand('<cword>'))<CR>
+    " i: Find files #including this file
+nnoremap  <leader>fi :call CscopeFind('i', expand('<cword>'))<CR>
+
+"tags
+set autochdir
+set tags=tags;
+
+"cscope setting
+" Use tags for definition search first
+"set cscopetagorder=1
+"'csto' 被设为 0，cscope 数据库先 被搜索，搜索失败的情况下在搜索标签文件 
+"设定了 'cscopetag'，这样所有的 :tag 命令就会实际上调用 :cstag。这包括 :tag、Ctrl-] 及 vim -t。
+"结果是一般的 tag 命令不仅搜索由 ctags 产生的标签文 件，同时也搜索 cscope 数据库,但是好像有bug,二者共存时有的无法搜索
+"let g:autocscope_menus=0
+" Use quickfix window to show cscope results
+"set cscopequickfix=s-,c-,d-,i-,t-,e-
+"if has("cscope") 
+    "set csprg=/usr/bin/cscope
+    "" Use both cscope and ctag
+    "set cscopetag
+    "" Show msg when cscope db added
+    "set cscopeverbose
+    "" Use cscope for definition search first
+    "set cscopetagorder=0
+"endif
+"nmap <C-\>s :cs find s <C-R>=expand("<cword>")<CR><CR>  
+"nmap <C-\>g :cs find g <C-R>=expand("<cword>")<CR><CR>  
+"nmap <C-\>c :cs find c <C-R>=expand("<cword>")<CR><CR>  
+"nmap <C-\>t :cs find t <C-R>=expand("<cword>")<CR><CR>  
+"nmap <C-\>e :cs find e <C-R>=expand("<cword>")<CR><CR>  
+"nmap <C-\>f :cs find f <C-R>=expand("<cfile>")<CR><CR>  
+"nmap <C-\>i :cs find i ^<C-R>=expand("<cfile>")<CR>$<CR>
+"nmap <C-\>d :cs find d <C-R>=expand("<cword>")<CR><CR> 
+" 解决cscope与tag共存时ctrl+]有时不正常的bug
+"nmap :tj =expand("")
+
+function! LoadCscope()
+  let db = findfile("cscope.out", ".;")
+  if (!empty(db))
+    let path = strpart(db, 0, match(db, "/cscope.out$"))
+    set nocscopeverbose " suppress 'duplicate connection' error
+    exe "cs add " . db . " " . path
+    set cscopeverbose
+  endif
+endfunction
+"au BufEnter /* call LoadCscope()
+
+"command-t
+nnoremap <silent> <Leader>t :CommandT<CR>
+nnoremap <silent> <Leader>b :CommandTBuffer<CR>
